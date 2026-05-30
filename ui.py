@@ -1,28 +1,24 @@
 import streamlit as st
-import requests
+import asyncio
 
-API_URL = "http://localhost:8000/chat"
+from main import run_multi_agent
 
 st.set_page_config(
     page_title="Multi Agent Assistant",
     layout="centered"
 )
 
-st.title("🤖 Multi Agent AI Assistant")
-
+st.title("🤖 Multi Agent AI Assistant -test1")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 
 for msg in st.session_state.messages:
 
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-
-prompt = st.chat_input("Ask me anything...")
-
+prompt = st.chat_input("Ask something...")
 
 if prompt:
 
@@ -40,30 +36,15 @@ if prompt:
 
         with st.spinner("Thinking..."):
 
-            try:
+            response = asyncio.run(
+                run_multi_agent(prompt)
+            )
 
-                response = requests.post(
-                    API_URL,
-                    json={"message": prompt},
-                    timeout=120
-                )
-
-                result = response.json()
-
-                answer = result.get(
-                    "response",
-                    "No response received."
-                )
-
-            except Exception as e:
-
-                answer = f"Error: {str(e)}"
-
-            st.markdown(answer)
+            st.markdown(response)
 
     st.session_state.messages.append(
         {
             "role": "assistant",
-            "content": answer
+            "content": response
         }
     )

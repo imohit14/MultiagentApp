@@ -7,8 +7,8 @@ on:
 
 env:
   IMAGE_NAME: imohit14/multiagent-app
-  RESOURCE_GROUP: multiagent-rg
-  CONTAINER_APP_NAME: multiagent-app
+  RESOURCE_GROUP: test
+  CONTAINER_APP_NAME: multiagentapp
 
 jobs:
 
@@ -18,12 +18,16 @@ jobs:
 
     steps:
 
+      # -----------------------------------
+      # Checkout Repository
+      # -----------------------------------
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ---------------------------
+      # -----------------------------------
       # Docker Hub Login
-      # ---------------------------
+      # -----------------------------------
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -31,38 +35,48 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # ---------------------------
+      # -----------------------------------
       # Build Docker Image
-      # ---------------------------
+      # -----------------------------------
 
       - name: Build Docker Image
         run: |
           docker build -t $IMAGE_NAME:${{ github.sha }} .
+          docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
 
-      # ---------------------------
-      # Push Image
-      # ---------------------------
+      # -----------------------------------
+      # Push Docker Images
+      # -----------------------------------
 
-      - name: Push Docker Image
+      - name: Push Docker Images
         run: |
           docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
 
-      # ---------------------------
+      # -----------------------------------
       # Azure Login
-      # ---------------------------
+      # -----------------------------------
 
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # ---------------------------
-      # Deploy to Container App
-      # ---------------------------
+      # -----------------------------------
+      # Install Azure Container Apps Extension
+      # -----------------------------------
+
+      - name: Install Container Apps Extension
+        run: |
+          az extension add --name containerapp --upgrade
+
+      # -----------------------------------
+      # Deploy Latest Image
+      # -----------------------------------
 
       - name: Deploy to Azure Container App
         run: |
           az containerapp update \
             --name $CONTAINER_APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --image $IMAGE_NAME:${{ github.sha }}
+            --image $IMAGE_NAME:latest
