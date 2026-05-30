@@ -8,7 +8,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🤖 Multi Agent AI Assistant -test1")
+st.title("🤖 Multi Agent AI Assistant")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
