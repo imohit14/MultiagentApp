@@ -1,0 +1,14 @@
+python-dotenv
+autogen-agentchat
+autogen-core
+autogen-ext[openai,azure,web-surfer]
+openai
+azure-identity
+asyncio
+streamlit
+fastapi 
+uvicorn
+requests
+PyPDF2
+pytz
+pydantic
